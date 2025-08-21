@@ -1,4 +1,41 @@
 package com.example.inventory_server.controller;
 
+import com.example.inventory_server.entity.StockHistory;
+import org.springframework.web.bind.annotation.*;
+import com.example.inventory_server.service.StockHistoryService;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/stock-histories")
 public class StockHistoryController {
+    private final StockHistoryService stockHistoryService;
+
+    public StockHistoryController(StockHistoryService stockHistoryService) {
+        this.stockHistoryService = stockHistoryService;
+    }
+
+    @GetMapping
+    public List<StockHistory> getStockHistories() {
+        return stockHistoryService.getAllStockHistories();
+    }
+
+    @GetMapping("/{id}")
+    public StockHistory getStockHistory(@PathVariable Long id) {
+        return stockHistoryService.getStockHistoryById(id);
+    }
+
+    @GetMapping("/category/{categoryId}")
+    public List<StockHistory> getStockHistoryByCategoryId(@PathVariable Long categoryId) { return stockHistoryService.getStockHistoryByCategoryId(categoryId); }
+
+    @PostMapping("/single")
+    public StockHistory createStockHistory(@RequestBody StockHistory stockHistory) {
+        return stockHistoryService.saveStockHistory(stockHistory);
+    }
+
+    @PostMapping("/bulk")
+    public List<StockHistory> createStockHistories(@RequestBody List<StockHistory> stockHistories) {
+        return stockHistoryService.saveAllHistories(stockHistories);
+    }
+
 }

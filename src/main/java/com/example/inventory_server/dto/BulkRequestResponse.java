@@ -1,11 +1,11 @@
 package com.example.inventory_server.dto;
 
 
-public class BulkDeleteResponse {
+public class BulkRequestResponse {
     private int successCount;
     private int failedCount;
 
-    public BulkDeleteResponse() {
+    public BulkRequestResponse() {
         successCount = 0;
         failedCount = 0;
     }

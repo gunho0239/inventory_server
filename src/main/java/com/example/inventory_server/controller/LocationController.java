@@ -1,13 +1,15 @@
-package controller;
+package com.example.inventory_server.controller;
 
-import entity.Location;
+import com.example.inventory_server.dto.BulkRequestResponse;
+import com.example.inventory_server.entity.Location;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import service.LocationService;
+import com.example.inventory_server.service.LocationService;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/locations")
+@RequestMapping("/locations")
 public class LocationController {
     private final LocationService locationService;
 
@@ -25,13 +27,27 @@ public class LocationController {
         return locationService.getLocationById(id);
     }
 
-    @PostMapping
+    @GetMapping("/section/{sectionId}")
+    public List<Location> getLocationBySectionId(@PathVariable Long sectionId) { return locationService.getLocationBySectionId(sectionId); }
+
+    @PostMapping("/single")
     public Location createLocation(@RequestBody Location location) {
         return locationService.saveLocation(location);
+    }
+
+    @PostMapping("/bulk")
+    public List<Location> createLocations(@RequestBody List<Location> locations) {
+        return locationService.saveAllLocations(locations);
     }
 
     @DeleteMapping("/{id}")
     public void deleteLocation(@PathVariable Long id) {
         locationService.deleteLocation(id);
+    }
+
+    @DeleteMapping("/bulk")
+    public ResponseEntity<BulkRequestResponse> deleteLocations(@RequestBody List<Long> ids) {
+        BulkRequestResponse result = locationService.deleteAllLocations(ids);
+        return ResponseEntity.ok(result);
     }
 }

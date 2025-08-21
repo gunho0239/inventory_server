@@ -1,4 +1,6 @@
 package com.example.inventory_server.repository;
 
-public class StockHistoryCategoryRepository {
-}
+import com.example.inventory_server.entity.StockHistoryCategory;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface StockHistoryCategoryRepository extends JpaRepository<StockHistoryCategory, Long> {}
