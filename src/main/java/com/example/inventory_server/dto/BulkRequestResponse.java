@@ -1,6 +1,8 @@
 package com.example.inventory_server.dto;
 
+import lombok.Getter;
 
+@Getter
 public class BulkRequestResponse {
     private int successCount;
     private int failedCount;

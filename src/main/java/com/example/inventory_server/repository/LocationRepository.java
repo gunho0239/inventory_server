@@ -7,5 +7,7 @@ import java.util.List;
 public interface LocationRepository extends JpaRepository<Location, Long>{
     List<Location> findAllByOrderBySection_SectionAscNumberAsc();
     List<Location> findBySection_IdOrderByNumberAsc(Long sectionId);
+    List<Location> findBySection_IdAndNumber(Long sectionId, Integer number);
+    List<Location> findByNumberOrderBySection_SectionAsc(Integer number);
     boolean existsBySection_IdAndNumber(Long sectionId, Integer number);
 }

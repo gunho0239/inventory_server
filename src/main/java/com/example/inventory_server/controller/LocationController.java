@@ -30,6 +30,14 @@ public class LocationController {
     @GetMapping("/section/{sectionId}")
     public List<Location> getLocationBySectionId(@PathVariable Long sectionId) { return locationService.getLocationBySectionId(sectionId); }
 
+    @GetMapping("/search")
+    public List<Location> getLocations(
+            @RequestParam(required = false) Long sectionId,
+            @RequestParam(required = false) Integer number
+    ) {
+        return locationService.getLocations(sectionId, number);
+    }
+
     @PostMapping("/single")
     public Location createLocation(@RequestBody Location location) {
         return locationService.saveLocation(location);

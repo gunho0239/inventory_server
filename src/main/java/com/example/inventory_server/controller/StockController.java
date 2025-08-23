@@ -77,12 +77,12 @@ public class StockController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/quantity")
-    public ResponseEntity<SingleRequestResponse> updateStockQuantity(@RequestBody Stock stock) {
+    @PutMapping("/single")
+    public ResponseEntity<SingleRequestResponse> updateStock(@RequestBody Stock stock) {
         SingleRequestResponse response = new SingleRequestResponse();
 
         try {
-            stockService.updateStockQuantity(stock.getId(), stock.getQuantity(), stock.getVersion());
+            stockService.updateStock(stock);
             response.setSuccess(true);
         } catch (OptimisticLockingFailureException | IllegalArgumentException e) {
             response.setSuccess(false);
@@ -95,12 +95,30 @@ public class StockController {
         return ResponseEntity.ok(response);
     }
 
+//    @PutMapping("/quantity")
+//    public ResponseEntity<SingleRequestResponse> updateStockQuantity(@RequestBody Stock stock) {
+//        SingleRequestResponse response = new SingleRequestResponse();
+//
+//        try {
+//            stockService.updateStockQuantity(stock.getId(), stock.getQuantity(), stock.getVersion());
+//            response.setSuccess(true);
+//        } catch (OptimisticLockingFailureException | IllegalArgumentException e) {
+//            response.setSuccess(false);
+//            response.setMessage(e.getMessage());
+//        } catch (Exception e) {
+//            response.setSuccess(false);
+//            response.setMessage("예상치 못한 오류 발생");
+//        }
+//
+//        return ResponseEntity.ok(response);
+//    }
+
     @PutMapping("/location")
     public ResponseEntity<SingleRequestResponse> updateStockLocation(@RequestBody Stock stock) {
         SingleRequestResponse response = new SingleRequestResponse();
 
         try {
-            stockService.updateStockLocation(stock.getId(), stock.getLocation(), stock.getVersion());
+            stockService.updateStockLocation(stock.getId(), stock.getQuantity(), stock.getLocation(), stock.getVersion());
             response.setSuccess(true);
         } catch (OptimisticLockingFailureException | IllegalArgumentException e) {
             response.setSuccess(false);

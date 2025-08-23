@@ -4,6 +4,7 @@ import com.example.inventory_server.entity.StockHistory;
 import org.springframework.web.bind.annotation.*;
 import com.example.inventory_server.service.StockHistoryService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -27,6 +28,19 @@ public class StockHistoryController {
 
     @GetMapping("/category/{categoryId}")
     public List<StockHistory> getStockHistoryByCategoryId(@PathVariable Long categoryId) { return stockHistoryService.getStockHistoryByCategoryId(categoryId); }
+
+    @GetMapping("/search")
+    public List<StockHistory> getStockHistories(
+            @RequestParam(required = false) LocalDateTime startDate,
+            @RequestParam(required = false) LocalDateTime endDate,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String specification,
+            @RequestParam(required = false) String maker,
+            @RequestParam(required = false) String memo
+    ) {
+        return stockHistoryService.getStockHistories(startDate, endDate, categoryId, type, specification, maker, memo);
+    }
 
     @PostMapping("/single")
     public StockHistory createStockHistory(@RequestBody StockHistory stockHistory) {

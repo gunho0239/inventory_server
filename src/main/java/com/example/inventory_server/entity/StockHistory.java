@@ -20,7 +20,7 @@ public class StockHistory {
     @JoinColumn(name = "category_id")
     private StockHistoryCategory category;
 
-    private String note;
+    private String memo;
     private String type;
     private String specification;
     private String maker;

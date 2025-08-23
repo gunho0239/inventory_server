@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class StockService {
@@ -88,28 +89,57 @@ public class StockService {
     }
 
     @Transactional
-    public void updateStockQuantity(Long stockId, Integer newQuantity, Long version) {
-        Stock stock = stockRepo.findById(stockId)
+    public void updateStock(Stock newStock) {
+        Stock stock = stockRepo.findById(newStock.getId())
                 .orElseThrow(() -> new IllegalArgumentException("해당 재고는 이미 삭제되었을 수 있습니다. 새로고침 후 다시 시도해주세요."));
 
-        if (!stock.getVersion().equals(version)) {
+        if (!stock.getVersion().equals(newStock.getVersion())) {
             throw new OptimisticLockingFailureException("해당 재고는 이미 수정되었습니다. 새로고침 후 다시 시도해주세요.");
         }
 
-        stock.setQuantity(newQuantity);
+        stock.setQuantity(newStock.getQuantity());
+        stock.setLocation(newStock.getLocation());
         stockRepo.save(stock);
     }
 
+//    @Transactional
+//    public void updateStockQuantity(Long stockId, Integer newQuantity, Long version) {
+//        Stock stock = stockRepo.findById(stockId)
+//                .orElseThrow(() -> new IllegalArgumentException("해당 재고는 이미 삭제되었을 수 있습니다. 새로고침 후 다시 시도해주세요."));
+//
+//        if (!stock.getVersion().equals(version)) {
+//            throw new OptimisticLockingFailureException("해당 재고는 이미 수정되었습니다. 새로고침 후 다시 시도해주세요.");
+//        }
+//
+//        stock.setQuantity(newQuantity);
+//        stockRepo.save(stock);
+//    }
+
     @Transactional
-    public void updateStockLocation(Long stockId, Location newLocation, Long version) {
-        Stock stock = stockRepo.findById(stockId)
+    public void updateStockLocation(Long stockId, Integer relocatedQuantity, Location newLocation, Long version) {
+        Stock originalStock = stockRepo.findById(stockId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 재고는 이미 삭제되었을 수 있습니다. 새로고침 후 다시 시도해주세요."));
 
-        if (!stock.getVersion().equals(version)) {
+        if (!originalStock.getVersion().equals(version)) {
             throw new OptimisticLockingFailureException("해당 재고는 이미 수정되었습니다. 새로고침 후 다시 시도해주세요.");
         }
 
-        stock.setLocation(newLocation);
-        stockRepo.save(stock);
+
+        // 전체 수량 이동시
+        if (Objects.equals(relocatedQuantity, originalStock.getQuantity())) {
+            originalStock.setLocation(newLocation);
+        }
+        else { // 일부 수량 이동시
+            Stock relocatedStock = new Stock();
+            relocatedStock.setPart(originalStock.getPart());
+            relocatedStock.setQuantity(relocatedQuantity);
+            relocatedStock.setLocation(newLocation);
+
+            stockRepo.save(relocatedStock); // 이동 수량만큼 새로 생성
+
+            originalStock.setQuantity(originalStock.getQuantity() - relocatedQuantity); // 기존 재고는 이동 수량을 제외하여 갱신
+        }
+
+        stockRepo.save(originalStock);
     }
 }

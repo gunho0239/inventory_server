@@ -30,7 +30,7 @@ public class PartService {
     }
 
     public List<Part> getPartByMakerId(Long makerId) {
-        return partRepo.findByMaker_IdOrderBySpecificationAsc(makerId);
+        return partRepo.findByMaker_IdOrderByType_TypeAscSpecificationAsc(makerId);
     }
 
     public List<Part> getParts(Long typeId, Long makerId, String specification) {
@@ -48,7 +48,7 @@ public class PartService {
         }
 
         if (makerId != null && specification != null) {
-            return partRepo.findByMaker_IdAndSpecificationContainingOrderBySpecificationAsc(
+            return partRepo.findByMaker_IdAndSpecificationContainingOrderByType_TypeAscSpecificationAsc(
                     makerId, specification);
         }
 
@@ -61,7 +61,7 @@ public class PartService {
         }
 
         if (specification != null) {
-            return partRepo.findBySpecificationContainingOrderBySpecificationAsc(specification);
+            return partRepo.findBySpecificationContainingOrderByType_TypeAscSpecificationAsc(specification);
         }
 
         return getAllParts();

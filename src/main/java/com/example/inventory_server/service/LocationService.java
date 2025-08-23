@@ -27,6 +27,22 @@ public class LocationService {
 
     public List<Location> getLocationBySectionId(Long sectionId) { return locationRepo.findBySection_IdOrderByNumberAsc(sectionId); }
 
+    public List<Location> getLocations(Long sectionId, Integer number) {
+        if (sectionId != null && number != null) {
+            return locationRepo.findBySection_IdAndNumber(sectionId, number);
+        }
+
+        if (sectionId != null) {
+            return locationRepo.findBySection_IdOrderByNumberAsc(sectionId);
+        }
+
+        if (number != null) {
+            return locationRepo.findByNumberOrderBySection_SectionAsc(number);
+        }
+
+        return getAllLocations();
+    }
+
     public Location saveLocation(Location location) {
         if (!locationRepo.existsBySection_IdAndNumber(
                 location.getSection().getId(),
