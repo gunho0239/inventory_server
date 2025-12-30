@@ -1,5 +1,6 @@
 package com.example.inventory_server.controller;
 
+import com.example.inventory_server.dto.BulkRequestResponseWithId;
 import com.example.inventory_server.dto.SingleRequestResponse;
 import com.example.inventory_server.entity.Stock;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -77,6 +78,13 @@ public class StockController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/bulk")
+    public ResponseEntity<BulkRequestResponseWithId> deleteStocks(@RequestBody List<Stock> stocks) {
+        BulkRequestResponseWithId result = stockService.deleteStocks(stocks);
+
+        return ResponseEntity.ok(result);
+    }
+
     @PutMapping("/single")
     public ResponseEntity<SingleRequestResponse> updateStock(@RequestBody Stock stock) {
         SingleRequestResponse response = new SingleRequestResponse();
@@ -93,6 +101,13 @@ public class StockController {
         }
 
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/bulk")
+    public ResponseEntity<BulkRequestResponseWithId> updateStocks(@RequestBody List<Stock> stocks) {
+        BulkRequestResponseWithId result = stockService.updateStocks(stocks);
+
+        return ResponseEntity.ok(result);
     }
 
 //    @PutMapping("/quantity")
@@ -129,6 +144,13 @@ public class StockController {
         }
 
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/locations")
+    public ResponseEntity<BulkRequestResponseWithId> updateStockLocations(@RequestBody List<Stock> stocks) {
+        BulkRequestResponseWithId result = stockService.updateStockLocations(stocks);
+
+        return ResponseEntity.ok(result);
     }
 
 }

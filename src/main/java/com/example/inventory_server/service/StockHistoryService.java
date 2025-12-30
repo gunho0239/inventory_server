@@ -41,7 +41,6 @@ public class StockHistoryService {
                 Sort.Order.desc("date")
         );
 
-
         return stockHistoryRepo.findAll(spec, sort);
     }
 

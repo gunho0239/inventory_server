@@ -1,5 +1,6 @@
 package com.example.inventory_server.service;
 
+import com.example.inventory_server.dto.BulkRequestResponseWithId;
 import com.example.inventory_server.entity.Location;
 import com.example.inventory_server.entity.Stock;
 import com.example.inventory_server.specification.StockSpecifications;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class StockService {
@@ -89,6 +91,41 @@ public class StockService {
     }
 
     @Transactional
+    public BulkRequestResponseWithId deleteStocks(List<Stock> stocks) {
+        BulkRequestResponseWithId result = new BulkRequestResponseWithId();
+
+        for (Stock stock : stocks) {
+            Long stockId = stock.getId();
+            Long version = stock.getVersion();
+
+            try {
+                Optional<Stock> stockOpt = stockRepo.findById(stockId);
+
+                if (stockOpt.isEmpty()) {
+                    result.addFailedId(stockId);
+                    continue;
+                }
+
+                Stock inquiredStock = stockOpt.get();
+
+                if (!inquiredStock.getVersion().equals(version)) {
+                    result.addFailedId(stockId);
+                    continue;
+                }
+
+                stockRepo.deleteById(stockId);
+                result.addSuccessId(stockId);
+            } catch (OptimisticLockingFailureException e) {
+                result.addFailedId(stockId);
+            } catch (Exception e) {
+                result.addFailedId(stockId);
+            }
+        }
+
+        return result;
+    }
+
+    @Transactional
     public void updateStock(Stock newStock) {
         Stock stock = stockRepo.findById(newStock.getId())
                 .orElseThrow(() -> new IllegalArgumentException("해당 재고는 이미 삭제되었을 수 있습니다. 새로고침 후 다시 시도해주세요."));
@@ -100,6 +137,42 @@ public class StockService {
         stock.setQuantity(newStock.getQuantity());
         stock.setLocation(newStock.getLocation());
         stockRepo.save(stock);
+    }
+
+    @Transactional
+    public BulkRequestResponseWithId updateStocks(List<Stock> newStocks) {
+        BulkRequestResponseWithId result = new BulkRequestResponseWithId();
+
+        for (Stock newStock: newStocks) {
+            Long stockId = newStock.getId();
+
+            try {
+                Optional<Stock> stockOpt = stockRepo.findById(stockId);
+
+                if (stockOpt.isEmpty()) {
+                    result.addFailedId(stockId);
+                    continue;
+                }
+
+                Stock inquiredStock = stockOpt.get();
+
+                if (!inquiredStock.getVersion().equals(newStock.getVersion())) {
+                    result.addFailedId(stockId);
+                    continue;
+                }
+
+                inquiredStock.setQuantity(newStock.getQuantity());
+                inquiredStock.setLocation(newStock.getLocation());
+                stockRepo.save(inquiredStock);
+                result.addSuccessId(stockId);
+            } catch (OptimisticLockingFailureException e) {
+                result.addFailedId(stockId);
+            } catch (Exception e) {
+                result.addFailedId(stockId);
+            }
+        }
+
+        return result;
     }
 
 //    @Transactional
@@ -141,5 +214,55 @@ public class StockService {
         }
 
         stockRepo.save(originalStock);
+    }
+
+    @Transactional
+    public BulkRequestResponseWithId updateStockLocations(List<Stock> changedStocks) {
+        BulkRequestResponseWithId result = new BulkRequestResponseWithId();
+
+        for (Stock changedStock: changedStocks) {
+            Long stockId = changedStock.getId();
+
+            try {
+                Optional<Stock> stockOpt = stockRepo.findById(stockId);
+
+                if (stockOpt.isEmpty()) {
+                    result.addFailedId(stockId);
+                    continue;
+                }
+
+                Stock originalStock = stockOpt.get();
+
+                if (!originalStock.getVersion().equals(changedStock.getVersion())) {
+                    result.addFailedId(stockId);
+                    continue;
+                }
+
+                Integer moveQuantity = changedStock.getQuantity();
+                Location moveLocation = changedStock.getLocation();
+
+                // 전체 수량 이동시
+                if (Objects.equals(moveQuantity, originalStock.getQuantity())) {
+                    originalStock.setLocation(moveLocation);
+                }
+                else { // 일부 수량 이동시
+                    Stock relocatedStock = new Stock();
+                    relocatedStock.setPart(originalStock.getPart());
+                    relocatedStock.setQuantity(moveQuantity);
+                    relocatedStock.setLocation(moveLocation);
+
+                    stockRepo.save(relocatedStock); // 이동 수량만큼 새로 생성
+                    originalStock.setQuantity(originalStock.getQuantity() - moveQuantity); // 기존 재고는 이동 수량을 제외하여 갱신
+                }
+                stockRepo.save(originalStock);
+                result.addSuccessId(stockId);
+            } catch (OptimisticLockingFailureException e) {
+                result.addFailedId(stockId);
+            } catch (Exception e) {
+                result.addFailedId(stockId);
+            }
+        }
+
+        return result;
     }
 }
