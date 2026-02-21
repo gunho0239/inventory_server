@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "org.example"
-version = "1.0-SNAPSHOT"
+version = "1.2-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -17,10 +17,11 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("com.mysql:mysql-connector-j:8.0.33")
+    implementation("com.mysql:mysql-connector-j:9.3.0")
     implementation("org.springframework.boot:spring-boot-starter-web")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
+    implementation("com.github.mwiede:jsch:2.27.7")
 }
 
 tasks.test {
