@@ -7,9 +7,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import com.example.inventory_server.repository.StockHistoryRepository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class StockHistoryService {
@@ -56,5 +58,15 @@ public class StockHistoryService {
         }
 
         return savedHistories;
+    }
+
+    public List<LocalDateTime> getReleasedDates() {
+        return stockHistoryRepo.findDatesByCategoryName("release").stream()
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    public List<StockHistory> getReleasedStocksByDate(LocalDateTime dateTime) {
+        return stockHistoryRepo.findByDateAndCategoryName(dateTime, "release");
     }
 }

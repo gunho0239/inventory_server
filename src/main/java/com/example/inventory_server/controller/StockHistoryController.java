@@ -52,4 +52,15 @@ public class StockHistoryController {
         return stockHistoryService.saveAllHistories(stockHistories);
     }
 
+    @GetMapping("/released/dates")
+    public List<LocalDateTime> getReleasedDates() {
+        return stockHistoryService.getReleasedDates();
+    }
+
+    @GetMapping("/released")
+    public List<StockHistory> getReleasedStocksByDate(@RequestParam LocalDateTime date) {
+        return stockHistoryService.getReleasedStocksByDate(date);
+    }
+
+
 }

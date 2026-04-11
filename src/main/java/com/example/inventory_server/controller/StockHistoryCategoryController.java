@@ -16,7 +16,7 @@ public class StockHistoryCategoryController {
     }
 
     @GetMapping
-    public List<StockHistoryCategory> getSections() {
+    public List<StockHistoryCategory> getStockHistoryCategories() {
         return stockHistoryCategoryService.getAllCategories();
     }
 
