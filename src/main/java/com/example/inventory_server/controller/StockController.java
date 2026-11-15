@@ -11,7 +11,7 @@ import com.example.inventory_server.service.StockService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/stocks")
+@RequestMapping("/api/stocks")
 public class StockController {
     private final StockService stockService;
 
@@ -109,24 +109,6 @@ public class StockController {
 
         return ResponseEntity.ok(result);
     }
-
-//    @PutMapping("/quantity")
-//    public ResponseEntity<SingleRequestResponse> updateStockQuantity(@RequestBody Stock stock) {
-//        SingleRequestResponse response = new SingleRequestResponse();
-//
-//        try {
-//            stockService.updateStockQuantity(stock.getId(), stock.getQuantity(), stock.getVersion());
-//            response.setSuccess(true);
-//        } catch (OptimisticLockingFailureException | IllegalArgumentException e) {
-//            response.setSuccess(false);
-//            response.setMessage(e.getMessage());
-//        } catch (Exception e) {
-//            response.setSuccess(false);
-//            response.setMessage("예상치 못한 오류 발생");
-//        }
-//
-//        return ResponseEntity.ok(response);
-//    }
 
     @PutMapping("/location")
     public ResponseEntity<SingleRequestResponse> updateStockLocation(@RequestBody Stock stock) {

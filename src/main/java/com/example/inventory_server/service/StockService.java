@@ -65,14 +65,36 @@ public class StockService {
     }
 
     public Stock saveStock(Stock stock) {
-        return stockRepo.save(stock);
+        Optional<Stock> existingOpt = stockRepo.findByPart_IdAndLocation_Id(
+                stock.getPart().getId(), stock.getLocation().getId());
+
+        if (existingOpt.isPresent()) {
+            Stock existing = existingOpt.get();
+            existing.setQuantity(existing.getQuantity() + stock.getQuantity());
+            stockRepo.save(existing);
+        }
+        else {
+            stockRepo.save(stock);
+        }
+
+        return stock;
     }
 
     public List<Stock> saveAllStocks(List<Stock> stocks) {
         List<Stock> savedStocks = new ArrayList<>();
 
         for (Stock stock : stocks) {
-            savedStocks.add(stockRepo.save(stock));
+            Optional<Stock> existingOpt = stockRepo.findByPart_IdAndLocation_Id(
+                    stock.getPart().getId(), stock.getLocation().getId());
+
+            if (existingOpt.isPresent()) {
+                Stock existing = existingOpt.get();
+                existing.setQuantity(existing.getQuantity() + stock.getQuantity());
+                stockRepo.save(existing);
+            } else {
+                stockRepo.save(stock);
+            }
+            savedStocks.add(stock);
         }
 
         return savedStocks;
@@ -197,30 +219,41 @@ public class StockService {
             throw new OptimisticLockingFailureException("해당 재고는 이미 수정되었습니다. 새로고침 후 다시 시도해주세요.");
         }
 
+        Optional<Stock> destinationOpt = stockRepo.findByPart_IdAndLocation_Id(
+                originalStock.getPart().getId(), newLocation.getId());
 
-        // 전체 수량 이동시
-        if (Objects.equals(relocatedQuantity, originalStock.getQuantity())) {
-            originalStock.setLocation(newLocation);
+        if (destinationOpt.isPresent()) {
+            Stock destination = destinationOpt.get();
+            destination.setQuantity(destination.getQuantity() + relocatedQuantity);
+            stockRepo.save(destination);
+
+            if (Objects.equals(relocatedQuantity, originalStock.getQuantity())) {
+                stockRepo.delete(originalStock);
+            } else {
+                originalStock.setQuantity(originalStock.getQuantity() - relocatedQuantity);
+                stockRepo.save(originalStock);
+            }
+        } else {
+            if (Objects.equals(relocatedQuantity, originalStock.getQuantity())) {
+                originalStock.setLocation(newLocation);
+            } else {
+                Stock relocatedStock = new Stock();
+                relocatedStock.setPart(originalStock.getPart());
+                relocatedStock.setQuantity(relocatedQuantity);
+                relocatedStock.setLocation(newLocation);
+                stockRepo.save(relocatedStock);
+
+                originalStock.setQuantity(originalStock.getQuantity() - relocatedQuantity);
+            }
+            stockRepo.save(originalStock);
         }
-        else { // 일부 수량 이동시
-            Stock relocatedStock = new Stock();
-            relocatedStock.setPart(originalStock.getPart());
-            relocatedStock.setQuantity(relocatedQuantity);
-            relocatedStock.setLocation(newLocation);
-
-            stockRepo.save(relocatedStock); // 이동 수량만큼 새로 생성
-
-            originalStock.setQuantity(originalStock.getQuantity() - relocatedQuantity); // 기존 재고는 이동 수량을 제외하여 갱신
-        }
-
-        stockRepo.save(originalStock);
     }
 
     @Transactional
     public BulkRequestResponseWithId updateStockLocations(List<Stock> changedStocks) {
         BulkRequestResponseWithId result = new BulkRequestResponseWithId();
 
-        for (Stock changedStock: changedStocks) {
+        for (Stock changedStock : changedStocks) {
             Long stockId = changedStock.getId();
 
             try {
@@ -241,20 +274,35 @@ public class StockService {
                 Integer moveQuantity = changedStock.getQuantity();
                 Location moveLocation = changedStock.getLocation();
 
-                // 전체 수량 이동시
-                if (Objects.equals(moveQuantity, originalStock.getQuantity())) {
-                    originalStock.setLocation(moveLocation);
-                }
-                else { // 일부 수량 이동시
-                    Stock relocatedStock = new Stock();
-                    relocatedStock.setPart(originalStock.getPart());
-                    relocatedStock.setQuantity(moveQuantity);
-                    relocatedStock.setLocation(moveLocation);
+                Optional<Stock> destinationOpt = stockRepo.findByPart_IdAndLocation_Id(
+                        originalStock.getPart().getId(), moveLocation.getId());
 
-                    stockRepo.save(relocatedStock); // 이동 수량만큼 새로 생성
-                    originalStock.setQuantity(originalStock.getQuantity() - moveQuantity); // 기존 재고는 이동 수량을 제외하여 갱신
+                if (destinationOpt.isPresent()) {
+                    Stock destination = destinationOpt.get();
+                    destination.setQuantity(destination.getQuantity() + moveQuantity);
+                    stockRepo.save(destination);
+
+                    if (Objects.equals(moveQuantity, originalStock.getQuantity())) {
+                        stockRepo.delete(originalStock);
+                    } else {
+                        originalStock.setQuantity(originalStock.getQuantity() - moveQuantity);
+                        stockRepo.save(originalStock);
+                    }
+                } else {
+                    if (Objects.equals(moveQuantity, originalStock.getQuantity())) {
+                        originalStock.setLocation(moveLocation);
+                    } else {
+                        Stock relocatedStock = new Stock();
+                        relocatedStock.setPart(originalStock.getPart());
+                        relocatedStock.setQuantity(moveQuantity);
+                        relocatedStock.setLocation(moveLocation);
+                        stockRepo.save(relocatedStock);
+
+                        originalStock.setQuantity(originalStock.getQuantity() - moveQuantity);
+                    }
+                    stockRepo.save(originalStock);
                 }
-                stockRepo.save(originalStock);
+
                 result.addSuccessId(stockId);
             } catch (OptimisticLockingFailureException e) {
                 result.addFailedId(stockId);

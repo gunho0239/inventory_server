@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 
 @RestController
-@RequestMapping("/backup")
+@RequestMapping("/api/backup")
 public class BackupController {
 
     @Autowired

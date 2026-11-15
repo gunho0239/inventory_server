@@ -9,7 +9,7 @@ import com.example.inventory_server.service.PartService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/parts")
+@RequestMapping("/api/parts")
 public class PartController {
     private final PartService partService;
 

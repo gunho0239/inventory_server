@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/stock-histories")
+@RequestMapping("/api/stock-histories")
 public class StockHistoryController {
     private final StockHistoryService stockHistoryService;
 

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface StockRepository extends JpaRepository<Stock, Long>, JpaSpecificationExecutor<Stock>
 {
@@ -12,5 +13,6 @@ public interface StockRepository extends JpaRepository<Stock, Long>, JpaSpecific
     List<Stock> findByPart_Type_IdOrderByPart_SpecificationAsc(Long typeId);
     List<Stock> findByPart_Maker_IdOrderByPart_SpecificationAsc(Long makerId);
     List<Stock> findByLocation_Section_IdOrderByPart_SpecificationAsc(Long sectionId);
+    Optional<Stock> findByPart_IdAndLocation_Id(Long partId, Long locationId);
 
 }

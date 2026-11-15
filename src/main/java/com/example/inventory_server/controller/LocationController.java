@@ -9,7 +9,7 @@ import com.example.inventory_server.service.LocationService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/locations")
+@RequestMapping("/api/locations")
 public class LocationController {
     private final LocationService locationService;
 
